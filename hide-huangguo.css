@@ -1,0 +1,71 @@
+/*
+ * Site-scoped cosmetic rules for huangguoai.com (黄果短剧) and its sister site
+ * huangguoac.com (黄果漫剧). They run the same template, so one file covers both.
+ *
+ * Why cosmetic and not network rules: the ads are first-party. They are entries
+ * with "isAd":true inside each page's own <script type="application/json"
+ * data-hero-slides> payload, and the creatives load from pic.zdmhyg.cn — the
+ * same CDN that serves every legitimate poster. No declarativeNetRequest rule
+ * can separate them, so element hiding is the only lever.
+ *
+ * Selector provenance: every class below was read out of the sites' own markup
+ * and inline <style> blocks, not guessed. The two sites differ in two places,
+ * noted inline. Selectors that match nothing on the other site are inert.
+ *
+ * Deliberately NOT hidden: .hg-footer__addrs. Those off-site links are the
+ * sites' own mirror addresses (qd05g.nboozgoc.com, huangguoac.pages.dev, ...),
+ * not ads — a blanket "hide external links" rule would take them out too.
+ */
+
+/* ---- Hero carousel: huangguoac.com ------------------------------------
+   This one has real per-slide elements, so an ad slide can be removed outright. */
+.hg-hero__slide:has(.hg-hero__ad-badge),
+.hg-hero__card:has(.hg-hero__ad-badge) {
+  display: none !important;
+}
+
+/* ---- Hero carousel: huangguoai.com ------------------------------------
+   This one is a single rotating panel with no per-slide elements, so an ad can
+   only be neutralised while it is the active slide. Deliberately not
+   display:none on .hg-hero — that would collapse the carousel on every ad
+   rotation and make the page jump. */
+.hg-hero:has(.hg-hero__ad-badge) .hg-hero__bg-img,
+.hg-hero:has(.hg-hero__ad-badge) .hg-hero__mask {
+  visibility: hidden !important;
+}
+
+.hg-hero:has(.hg-hero__ad-badge) .hg-hero__cover-link,
+.hg-hero:has(.hg-hero__ad-badge) .hg-hero__play,
+.hg-hero:has(.hg-hero__ad-badge) .hg-hero__title,
+.hg-hero:has(.hg-hero__ad-badge) .hg-hero__desc {
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
+
+/* Thumbnail strip entries that leave the site are ad slides. */
+.hg-hero__thumb-list a[href^="http"]:not([href*="huangguoai.com"]):not([href*="huangguoac.com"]) {
+  display: none !important;
+}
+
+/* ---- Navigation affiliate links ---------------------------------------
+   Off-site entries dressed as navigation: huangguoai.com carries an "app
+   download" link (observed at fabf7.jbmekmlt.cc), huangguoac.com carries
+   data-menu-id="1" pointing at theporndude.com. Both domains rotate, so match
+   on "leaves the site" rather than on the domain. Scoped to the nav bars, which
+   is what keeps the footer's mirror addresses intact. */
+.hg-nav-list a.hg-nav-item[href^="http"]:not([href*="huangguoai.com"]):not([href*="huangguoac.com"]),
+a.hg-topbar-nav__item[href^="http"]:not([href*="huangguoai.com"]):not([href*="huangguoac.com"]) {
+  display: none !important;
+}
+
+/* ---- Floating download button (huangguoai.com only) ------------------- */
+.hg-fab__btn--download,
+.hg-fab__dl {
+  display: none !important;
+}
+
+/* ---- In-grid promo cards with an off-site destination ----------------- */
+.hg-drama-card[href^="http"]:not([href*="huangguoai.com"]):not([href*="huangguoac.com"]),
+a[href^="http"]:not([href*="huangguoai.com"]):not([href*="huangguoac.com"]) > .hg-drama-card {
+  display: none !important;
+}

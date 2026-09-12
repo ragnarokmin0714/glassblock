@@ -56,6 +56,14 @@ All notable changes to this project are documented here. The format follows
   its own popup toggle. EasyList/EasyPrivacy are Western-focused and barely
   touch mainland ad networks, so Chinese-language sites were largely unfiltered.
 - `tools/update-lists.sh` now refreshes EasyList China alongside the other two.
+- `hide-huangguo.css`, the first site-scoped cosmetic ruleset, registered as
+  its own `content_scripts` entry and covering huangguoai.com plus its sister
+  site huangguoac.com. Both inject ads as `"isAd":true` entries in their own
+  hero-slides JSON, with creatives served from the same CDN as their real
+  posters, so no network rule can touch them without collateral damage.
+- Custom rule #3 blocks the ad landing domains those two sites link out to, so
+  a click that slips past the cosmetic rules still goes nowhere. The domains
+  rotate; treat the list as best-effort, not exhaustive.
 
 ### Fixed
 - Custom ruleset now also blocks `main_frame` requests. Without it, a popunder

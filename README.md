@@ -25,6 +25,7 @@ If you would rather not grant `activeTab`, delete it from `manifest.json` and de
 | `rules_custom.json` | Your own hand-written rules |
 | `hide-generic.css` | **Generated.** EasyList/EasyList China generic element-hiding rules as plain CSS (~14k selectors) |
 | `hide-ads.css` | Hand-written cosmetic filtering, applied to every site |
+| `hide-huangguo.css` | Site-scoped cosmetic rules for huangguoai.com / huangguoac.com, whose ads are first-party and unblockable at network level |
 | `popup.html` / `popup.js` | Toolbar popup with per-ruleset on/off toggles |
 | `tools/convert.py` | Converter: Adblock Plus filter syntax → MV3 rule JSON |
 | `tools/gen-cosmetic.py` | Generator: generic `##` element-hiding filters → `hide-generic.css` |
@@ -158,7 +159,7 @@ upstream on every `tools/update-lists.sh` run and will lose your edits. To find 
 
 ## Limitations (by design)
 
-- Cosmetic filtering is partial. The ~14,200 *generic* element-hiding rules from EasyList/EasyList China ship in `hide-generic.css`, but the ~15,900 *domain-scoped* ones (`example.com##.promo`) do not — a global stylesheet cannot scope by site, so those need a per-site stylesheet of their own. uBlock's procedural filters (`:has-text()`, `:upward()`) need a DOM engine and are out of scope entirely.
+- Cosmetic filtering is partial. The ~14,200 *generic* element-hiding rules from EasyList/EasyList China ship in `hide-generic.css`, but the ~15,900 *domain-scoped* ones (`example.com##.promo`) do not — a global stylesheet cannot scope by site, so those need a per-site file like `hide-huangguo.css`. uBlock's procedural filters (`:has-text()`, `:upward()`) need a DOM engine and are out of scope entirely.
 - `#@#` un-hide exceptions cannot be expressed in a global stylesheet, so any selector carrying one is dropped rather than applied — erring toward showing an ad over breaking a page.
 - Cannot block YouTube in-video ads or first-party ads (served from the same domain as the content).
 - No anti-adblock countermeasures — some sites will detect blocking and complain.
@@ -166,5 +167,5 @@ upstream on every `tools/update-lists.sh` run and will lose your edits. To find 
 
 ## Licensing and attribution
 
-- Extension code (`manifest.json`, `popup.*`, `hide-ads.css`, `tools/convert.py`, `tools/gen-cosmetic.py`): MIT.
+- Extension code (`manifest.json`, `popup.*`, `hide-ads.css`, `hide-huangguo.css`, `tools/convert.py`, `tools/gen-cosmetic.py`): MIT.
 - `rules_easylist.json`, `rules_easylistchina.json`, `rules_easyprivacy.json` and **`hide-generic.css`** are derived from [EasyList, EasyList China and EasyPrivacy](https://easylist.to/), © The EasyList authors, dual-licensed under [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html) and [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). These files remain under those licenses.

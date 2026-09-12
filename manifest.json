@@ -38,6 +38,11 @@
       "matches": ["<all_urls>"],
       "css": ["hide-generic.css", "hide-ads.css"],
       "run_at": "document_start"
+    },
+    {
+      "matches": ["*://*.huangguoai.com/*", "*://*.huangguoac.com/*"],
+      "css": ["hide-huangguo.css"],
+      "run_at": "document_start"
     }
   ],
   "action": {

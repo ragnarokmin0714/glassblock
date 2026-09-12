@@ -65,5 +65,29 @@
         "script"
       ]
     }
+  },
+  {
+    "id": 3,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": [
+        "jbmekmlt.cc",
+        "huxrzdjnv.cc",
+        "jepomx.com",
+        "gws4djh.cc",
+        "gbd7sjs.cc",
+        "theporndude.com"
+      ],
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "image",
+        "xmlhttprequest",
+        "ping",
+        "other"
+      ]
+    }
   }
 ]
