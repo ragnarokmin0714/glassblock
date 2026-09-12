@@ -44,6 +44,7 @@
         "revcontent.com"
       ],
       "resourceTypes": [
+        "main_frame",
         "script",
         "image",
         "xmlhttprequest",
@@ -60,7 +61,9 @@
     "action": { "type": "block" },
     "condition": {
       "urlFilter": "/pagead/js/adsbygoogle.js",
-      "resourceTypes": ["script"]
+      "resourceTypes": [
+        "script"
+      ]
     }
   }
 ]

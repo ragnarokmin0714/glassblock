@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "GlassBlock",
-  "version": "1.2.0",
-  "description": "A minimal, self-built ad blocker: declarativeNetRequest network blocking (EasyList + EasyPrivacy) plus cosmetic element hiding.",
-  "permissions": ["declarativeNetRequest"],
+  "version": "1.4.0",
+  "description": "A minimal, self-built ad blocker: declarativeNetRequest network blocking (EasyList + EasyList China + EasyPrivacy) plus generated and hand-written cosmetic element hiding.",
+  "permissions": ["declarativeNetRequest", "declarativeNetRequestFeedback", "activeTab"],
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
@@ -22,6 +22,11 @@
         "path": "rules_easylist.json"
       },
       {
+        "id": "easylistchina",
+        "enabled": true,
+        "path": "rules_easylistchina.json"
+      },
+      {
         "id": "easyprivacy",
         "enabled": true,
         "path": "rules_easyprivacy.json"
@@ -31,7 +36,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "css": ["hide-ads.css"],
+      "css": ["hide-generic.css", "hide-ads.css"],
       "run_at": "document_start"
     }
   ],

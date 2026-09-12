@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <style>
-    body { font-family: system-ui, sans-serif; width: 240px; padding: 12px; }
+    body { font-family: system-ui, sans-serif; width: 248px; padding: 12px; }
     header { display: flex; align-items: center; gap: 9px; margin: 0 0 12px; }
     header svg { width: 26px; height: 26px; flex: none; }
     h1 { font-size: 16px; margin: 0; letter-spacing: -0.02em; }
@@ -11,6 +11,29 @@
     h1 .block { font-weight: 700; }
     label { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 6px; }
     #status { color: #666; font-size: 12px; margin-top: 8px; }
+    .site { border-top: 1px solid #e3e3e3; margin-top: 11px; padding-top: 10px; }
+    .site__host {
+      font-size: 12px; color: #444; margin-bottom: 7px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .site__host b { font-weight: 600; }
+    #pause {
+      width: 100%; padding: 6px 8px; font: inherit; font-size: 13px;
+      border: 1px solid #c8c8c8; border-radius: 5px; background: #fafafa;
+      cursor: pointer;
+    }
+    #pause:hover:not(:disabled) { background: #f0f0f0; }
+    #pause:disabled { color: #999; cursor: default; }
+    #pause[data-paused="true"] { border-color: #d08a00; color: #8a5c00; background: #fff8e8; }
+    #blocked { color: #666; font-size: 12px; margin-top: 7px; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #202124; color: #e8eaed; }
+      #status, #blocked, .site__host { color: #9aa0a6; }
+      .site { border-top-color: #3c4043; }
+      #pause { background: #2a2b2e; border-color: #5f6368; color: #e8eaed; }
+      #pause:hover:not(:disabled) { background: #35363a; }
+      #pause[data-paused="true"] { background: #3a2f14; border-color: #d08a00; color: #f5c469; }
+    }
   </style>
 </head>
 <body>
@@ -28,10 +51,19 @@
     </svg>
     <h1><span class="glass">Glass</span><span class="block">Block</span></h1>
   </header>
+
   <label><input type="checkbox" id="custom"> Custom rules</label>
   <label><input type="checkbox" id="easylist"> EasyList (ads)</label>
+  <label><input type="checkbox" id="easylistchina"> EasyList China (CN ads)</label>
   <label><input type="checkbox" id="easyprivacy"> EasyPrivacy (trackers)</label>
   <div id="status"></div>
+
+  <div class="site">
+    <div class="site__host" id="host">&nbsp;</div>
+    <button id="pause" disabled>Pause on this site</button>
+    <div id="blocked">&nbsp;</div>
+  </div>
+
   <script src="popup.js"></script>
 </body>
 </html>

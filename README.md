@@ -1,8 +1,18 @@
 # GlassBlock
 
-A minimal, self-built Chrome ad blocker based on the Manifest V3 `declarativeNetRequest` API, with full **EasyList** and **EasyPrivacy** coverage converted to native Chrome rule format. The name says the pitch: like a pane of glass, everything about it is transparent — you can see (and audit) exactly what it does.
+A minimal, self-built Chrome ad blocker based on the Manifest V3 `declarativeNetRequest` API, with full **EasyList**, **EasyList China** and **EasyPrivacy** coverage converted to native Chrome rule format. The name says the pitch: like a pane of glass, everything about it is transparent — you can see (and audit) exactly what it does.
 
-The extension code is ~100 lines with zero dependencies. It never requests permission to read your page content — filtering is declarative and executed by the browser engine itself. You can audit every line, and nobody can push a malicious update to you.
+The extension code is a few hundred lines with zero dependencies, and filtering is declarative — the browser engine does the matching, not a content script reading your pages. You can audit every line, and nobody can push a malicious update to you.
+
+It holds three permissions, and it is worth knowing exactly what each buys:
+
+| Permission | Why | Scope |
+|---|---|---|
+| `declarativeNetRequest` | The blocking itself | No page access; rules are evaluated by Chrome |
+| `activeTab` | Reading the current tab's hostname, so "Pause on this site" knows which site you mean | Granted only for the tab you are on, only when you click the toolbar icon, and it lapses on navigation |
+| `declarativeNetRequestFeedback` | The match counter in the popup | Chrome grants it to unpacked extensions only. Drop it from `manifest.json` if you ever pack this — the popup degrades quietly |
+
+If you would rather not grant `activeTab`, delete it from `manifest.json` and delete the `.site` block from `popup.html`; everything else keeps working.
 
 ## File structure
 
@@ -10,11 +20,14 @@ The extension code is ~100 lines with zero dependencies. It never requests permi
 |------|---------|
 | `manifest.json` | Extension manifest (permissions, rulesets, content script, popup) |
 | `rules_easylist.json` | EasyList converted to declarativeNetRequest rules (ads) |
+| `rules_easylistchina.json` | EasyList China converted to declarativeNetRequest rules (mainland ad networks) |
 | `rules_easyprivacy.json` | EasyPrivacy converted to declarativeNetRequest rules (trackers) |
 | `rules_custom.json` | Your own hand-written rules |
-| `hide-ads.css` | Cosmetic filtering (hides leftover empty ad containers) |
+| `hide-generic.css` | **Generated.** EasyList/EasyList China generic element-hiding rules as plain CSS (~14k selectors) |
+| `hide-ads.css` | Hand-written cosmetic filtering, applied to every site |
 | `popup.html` / `popup.js` | Toolbar popup with per-ruleset on/off toggles |
 | `tools/convert.py` | Converter: Adblock Plus filter syntax → MV3 rule JSON |
+| `tools/gen-cosmetic.py` | Generator: generic `##` element-hiding filters → `hide-generic.css` |
 | `tools/update-lists.sh` | One-command refresh of the EasyList/EasyPrivacy rule files |
 | `CHANGELOG.md` | Version history and release notes |
 | `icons/` | Master `icon.svg` plus exported `icon16/48/128.png` used by the manifest |
@@ -26,7 +39,7 @@ This is an unpacked extension for personal use — no Chrome Web Store required:
 1. Open Chrome and navigate to `chrome://extensions`
 2. Enable **Developer mode** (top-right toggle)
 3. Click **Load unpacked** (top-left)
-4. Select this folder (`my-adblocker/`)
+4. Select this folder (`glassblock/`)
 5. Done. The icon appears in the toolbar (it may be tucked into the puzzle-piece menu — pin it if you like)
 
 > **Note:** An unpacked extension is bound to its folder path. Do not move or delete this folder, or the extension will stop working. Chrome may occasionally remind you about developer-mode extensions on startup — click "Keep" to dismiss.
@@ -37,7 +50,7 @@ Open any ad-heavy news site, press F12 → **Network** tab, and reload. Requests
 
 ## Daily use
 
-- **Toggle rulesets**: click the toolbar icon. Each ruleset (Custom / EasyList / EasyPrivacy) can be enabled or disabled independently and takes effect immediately. The cosmetic CSS is not affected by these toggles.
+- **Toggle rulesets**: click the toolbar icon. Each ruleset (Custom / EasyList / EasyList China / EasyPrivacy) can be enabled or disabled independently and takes effect immediately. The cosmetic CSS is not affected by these toggles.
 - **A site broke?** Pause the rulesets via the popup and reload to confirm the blocker is the cause. If it is, see "Whitelisting a site" below.
 
 ## Configuration
@@ -99,7 +112,14 @@ Full reference: [Chrome declarativeNetRequest documentation](https://developer.c
 
 ### Whitelisting a site
 
-If blocking breaks a site, add an `allow` rule to `rules_custom.json` with a higher `priority` than the block rules:
+The quick way: open the popup and click **Pause on this site**. That writes a
+dynamic `allowAllRequests` rule for the current hostname (and its subdomains) at
+priority 100, above every static rule, and reloads the tab. Click **Resume on
+this site** to remove it. Dynamic rules survive browser restarts and are not
+touched by `tools/update-lists.sh`.
+
+For a permanent entry you want under version control, add an `allow` rule to
+`rules_custom.json` with a higher `priority` than the block rules:
 
 ```json
 {
@@ -114,7 +134,8 @@ If blocking breaks a site, add an `allow` rule to `rules_custom.json` with a hig
 
 ### Hiding more ad elements
 
-Edit `hide-ads.css`. To find a selector: right-click the ad → **Inspect**, find the ad container's `id` or `class`, and add it:
+Edit `hide-ads.css` — **not** `hide-generic.css`, which is regenerated from
+upstream on every `tools/update-lists.sh` run and will lose your edits. To find a selector: right-click the ad → **Inspect**, find the ad container's `id` or `class`, and add it:
 
 ```css
 .some-ad-class,
@@ -133,16 +154,17 @@ Edit `hide-ads.css`. To find a selector: right-click the ad → **Inspect**, fin
 | Extension card shows a red "Errors" badge | Open it — usually a JSON syntax error in a rules file (trailing comma, duplicate `id`) |
 | A site's layout broke | Pause via the popup to confirm; add an `allow` rule if it's network blocking, or remove the CSS selector if it's cosmetic |
 | Ads still showing | F12 → Network, find the ad request's domain, add it to `rules_custom.json` |
-| Ruleset fails to enable | Chrome guarantees 30,000 static rules and this extension ships ~13,500, so it fits; if you add more lists, watch the total |
+| Ruleset fails to enable | Chrome guarantees 30,000 static rules and this extension ships ~19,600, so it fits; if you add more lists, watch the total. `tools/update-lists.sh` refuses to install a set that would exceed the limit |
 
 ## Limitations (by design)
 
-- No cosmetic filtering from EasyList — element hiding uses only the small hand-written `hide-ads.css`. Sites may show empty placeholder boxes where ads used to be.
+- Cosmetic filtering is partial. The ~14,200 *generic* element-hiding rules from EasyList/EasyList China ship in `hide-generic.css`, but the ~15,900 *domain-scoped* ones (`example.com##.promo`) do not — a global stylesheet cannot scope by site, so those need a per-site stylesheet of their own. uBlock's procedural filters (`:has-text()`, `:upward()`) need a DOM engine and are out of scope entirely.
+- `#@#` un-hide exceptions cannot be expressed in a global stylesheet, so any selector carrying one is dropped rather than applied — erring toward showing an ad over breaking a page.
 - Cannot block YouTube in-video ads or first-party ads (served from the same domain as the content).
 - No anti-adblock countermeasures — some sites will detect blocking and complain.
 - Regex filters and `$csp`/`$redirect`/`$removeparam` filters from EasyList are skipped (declarativeNetRequest cannot express them; they are a small fraction of the list).
 
 ## Licensing and attribution
 
-- Extension code (`manifest.json`, `popup.*`, `hide-ads.css`, `tools/convert.py`): MIT.
-- `rules_easylist.json` and `rules_easyprivacy.json` are derived from [EasyList and EasyPrivacy](https://easylist.to/), © The EasyList authors, dual-licensed under [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html) and [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). These files remain under those licenses.
+- Extension code (`manifest.json`, `popup.*`, `hide-ads.css`, `tools/convert.py`, `tools/gen-cosmetic.py`): MIT.
+- `rules_easylist.json`, `rules_easylistchina.json`, `rules_easyprivacy.json` and **`hide-generic.css`** are derived from [EasyList, EasyList China and EasyPrivacy](https://easylist.to/), © The EasyList authors, dual-licensed under [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html) and [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). These files remain under those licenses.
